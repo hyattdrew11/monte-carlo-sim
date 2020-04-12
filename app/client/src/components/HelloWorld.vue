@@ -21,7 +21,13 @@
           <label class="tx-12">Choose Exchange:</label>
           <b-form-select class="tx-12" v-model="exchange" :options="exchanges" @change="changeExchange(exchange)"></b-form-select>
         </b-col>
-         <b-col lg="8" md="8" sm="12">
+         <b-col lg="4" md="4" sm="12">
+          <label class="tx-12">Time Range</label>
+            <b-form-select class="tx-12" v-model="range">
+              <b-form-select-option v-for="x in ranges" :key="x.value" :value="x.value">{{ x.text }}</b-form-select-option>
+            </b-form-select>
+          </b-col>
+         <b-col lg="4" md="4" sm="12">
           <label class="tx-12">Choose Stock</label>
           <basic-select
             :options="stocks"
@@ -38,7 +44,7 @@
            <label class="tx-12">Portfolio</label>
            <p v-for="(x, index) in portfolio" :key="x.Symbol" class="tx-12">
             <strong>{{ x.Symbol }}</strong> | {{ x.Company_Name }}
-            <i class="fa fa-times-circle float-right" @click="removeStock(index)"></i>
+            <i class="fa fa-times-circle float-right pointer" @click="removeStock(index)"></i>
 
             </p>
          </b-col>
@@ -71,6 +77,49 @@ export default {
       currentExchange: null,
       stock: null,
       stocks: [],
+      range: 'ytd',
+      ranges: [
+        {
+          value: '1d',
+          text: 'Today'
+        },
+        {
+          value: '5d',
+          text: 'Past 5 Days'
+        },
+        {
+          value: '1mo',
+          text: 'Past Month'
+        },
+        {
+          value: '3mo',
+          text: 'Past 3 Months'
+        },
+        {
+          value: '6mo',
+          text: 'Past 6 Months'
+        },
+        {
+          value: 'ytd',
+          text: 'Year to date'
+        },
+        {
+          value: '1y',
+          text: 'Past Year'
+        },
+        {
+          value: '2y',
+          text: 'Past 2 Years'
+        },
+        {
+          value: '5y',
+          text: 'Past 5 Years'
+        },
+        {
+          value: '10y',
+          text: 'Past 10 Years'
+        }
+      ],
       portfolio: [],
       searchText: '', 
       item: {
@@ -80,7 +129,7 @@ export default {
       chartOptions: {
         zoomType: 'x',
         title: {
-                text: 'Ticker'
+                text: ''
         },
         xAxis: {
                 type: 'datetime'
@@ -122,14 +171,19 @@ export default {
   },
   methods: {
     removeStock(index) {
-      console.log(index)
+      this.portfolio.splice(index, 1)
+      if(this.portfolio.length < 1) {
+        this.stock = null
+        this.chartOptions.series = []
+      }
     },
     onSelect (item) {
       this.$Progress.start()
+      this.chartOptions.series = []
       let s       = item.value
       let stocks  = this.currentExchange.data
       this.item   = item
-      this.axios.get('/api/stock/'+stocks[s].Symbol)
+      this.axios.get('/api/stock/'+stocks[s].Symbol+'/'+this.range)
       .then(({ data }) => {  
         let x,
             open,

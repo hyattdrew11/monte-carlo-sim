@@ -41,11 +41,11 @@ class Dashboard(Resource):
 		return view
 
 class Stock(Resource):
-	def get(self, symbol):
+	def get(self, symbol, trange):
 		ticker = yf.Ticker(symbol)
 		# use "period" instead of start/end
         # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
-		hist = ticker.history(period="ytd")
+		hist = ticker.history(period=trange)
 		return hist.to_json()
 
 class NASDAQ(Resource):
@@ -65,17 +65,10 @@ class NYSE(Resource):
     def get(self):
         return nyse
 
-
-# class ms(Resource):
-#     def get(self):
-#         return msft.info
-
 api.add_resource(HelloWorld, '/')
-# api.add_resource(ms, '/ms')
 api.add_resource(NASDAQ, '/nasdaq')
-# api.add_resource(NASDAQ_SYMBOLS, '/nasdaq/symbols')
 api.add_resource(Dashboard, '/api/dashboard')
-api.add_resource(Stock, '/api/stock/<symbol>')
+api.add_resource(Stock, '/api/stock/<symbol>/<trange>')
 
 @app.route('/home')
 def index():
