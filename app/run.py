@@ -16,7 +16,7 @@ with open('exchanges/NYSE.json') as f:
 
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 api = Api(app)
 
 class HelloWorld(Resource):
